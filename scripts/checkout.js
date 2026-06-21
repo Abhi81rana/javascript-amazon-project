@@ -1,6 +1,6 @@
-import {cart, removeFromCart} from '../data/cart.js';
+import {cart, removeFromCart,updateDeliveryOption} from '../data/cart.js';
 import {products} from '../data/products.js';
-import {formateCurrency} from './utils/money.js';
+import {formatCurrency} from './utils/money.js';
 import {hello} from 'https://unpkg.com/supersimpledev@1.0.1/hello.esm.js';
 import dayjs from 'https://unpkg.com/supersimpledev@8.5.0/dayjs/esm/index.js';
 import {deliveryOptions} from '../data/deliveryOptions.js';
@@ -35,16 +35,22 @@ cart.forEach((cartItem)=> {
     {
       deliveryOption = option;
     }
+    if (!deliveryOption)
+  {
+    deliveryOption = '';
+  }
   });
+  
 
   const today = dayjs();
-  const deliveryDate = today.add(deliveryOptions.deliveryDays,
-    'days'
-  );
-  const dateString = deliveryDate.format(
-    'dddd,MMMM D'
-  );
-
+    const deliveryDate = today.add(
+      deliveryOption.deliveryDays,
+      'days'
+    );
+    const dateString = deliveryDate.format(
+      'dddd,MMMM D'
+    );
+  
   cartSummaryHTML +=
   `
     <div class="cart-item-container
@@ -62,7 +68,7 @@ cart.forEach((cartItem)=> {
             ${matchingProduct.name}
           </div>
           <div class="product-price">
-            ${formateCurrency(matchingProduct.priceCents)}
+            ${formatCurrency(matchingProduct.priceCents)}
           </div>
           <div class="product-quantity">
             <span>
@@ -105,13 +111,15 @@ let html = '';
     const priceString = deliveryOption.priceCents
       === 0
         ? 'FREE'
-        :`$${formateCurrency(deliveryOption.priceCents)} -`;
+        :`$${formatCurrency(deliveryOption.priceCents)} -`;
 
     const isChecked = deliveryOption.id ===
     cartItem.deliveryOptionId;
 
     html += `
-      <div class="delivery-option">
+      <div class="delivery-option js-delivery-option"
+        data-product-id="${matchingProduct.id}"
+        data-delivery-option-id="${deliveryOption.id}">
         <input type="radio"
           ${isChecked ? 'checked' : ''}
           class="delivery-option-input"
@@ -144,3 +152,11 @@ document.querySelector('.js-order-summary')
         container.remove();
       });
     });
+document.querySelectorAll('.js-delivery-option')
+  .forEach((element) =>
+  {
+    element.addEventListener('click', () =>{
+      const {productId,deliveryOptionId} = element.dataset;
+      updateDeliveryOption(productId, deliveryOptionId);
+    });
+  });
