@@ -86,3 +86,21 @@ export function updateDeliveryOption(productId, deliveryOptionId)
   matchingItem.deliveryOptionId = deliveryOptionId;
   saveToStorage();
 }
+
+
+export let products =[];
+
+//create function to load products from backend
+export function loadCart(fun) {
+  //making XML to request my backend
+  const xhr = new XMLHttpRequest();
+
+xhr.addEventListener('load', () => {
+
+  console.log(xhr.response);
+  fun();
+});
+
+  xhr.open('GET','https://supersimplebackend.dev/cart');
+xhr.send();
+}
